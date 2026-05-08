@@ -575,17 +575,19 @@ async function avviaRicerca() {
     const perQuery = Math.max(1, Math.ceil(maxItems / queries.length));
     const payload = {
       searchStringsArray: queries,
+      locationQuery: prov || 'Italia',
       maxCrawledPlacesPerSearch: perQuery,
       language: 'it',
-      countryCode: 'it',
       maxImages: 0,
+      maxReviews: 0,
       includeHistogram: false,
       includeOpeningHours: false,
-      includePeopleAlsoSearchFor: false,
-      maxReviews: 0,
+      includePeopleAlsoSearch: false,
+      additionalInfo: false,
+      exportPlaceUrls: false,
     };
     const resp = await fetch(
-      `https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}&timeout=300`,
+      `https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}`,
       { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }
     );
     if(!resp.ok) {
