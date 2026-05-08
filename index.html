@@ -189,6 +189,35 @@
   .badge-dim-piccola{ background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
   .badge-dim-media  { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
   .badge-dim-grande { background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; }
+  /* DEBUG */
+  .dbg-section { margin-bottom: 1.25rem; }
+  .dbg-label { font-size: 0.7rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .dbg-box { background: #0f172a; border: 1px solid #334155; border-radius: var(--radius); padding: 1rem; font-family: var(--mono); font-size: 0.78rem; color: #94a3b8; overflow-x: auto; white-space: pre; max-height: 320px; overflow-y: auto; line-height: 1.6; }
+  .dbg-box .key   { color: #7dd3fc; }
+  .dbg-box .str   { color: #86efac; }
+  .dbg-box .num   { color: #fca5a5; }
+  .dbg-box .bool  { color: #c4b5fd; }
+  .dbg-box .null  { color: #94a3b8; font-style: italic; }
+  .dbg-box .warn  { color: #fbbf24; }
+  .dbg-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 1rem; }
+  .dbg-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1rem; }
+  .dbg-stat-n { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+  .dbg-stat-l { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
+  .dbg-field-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .dbg-field-table th { background: var(--surface2); padding: 6px 10px; text-align: left; font-size: 0.7rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border2); }
+  .dbg-field-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .dbg-field-table tr:last-child td { border-bottom: none; }
+  .dbg-pct-bar { height: 6px; background: var(--border2); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .dbg-pct-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.3s; }
+  .dbg-pct-fill.low { background: var(--danger); }
+  .dbg-pct-fill.mid { background: var(--warn); }
+  .tab-bar { display: flex; gap: 4px; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn { padding: 6px 14px; font-size: 0.82rem; font-weight: 500; border: none; background: none; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: var(--font); transition: all 0.12s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   @media (max-width: 720px) { .dim-grid { grid-template-columns: 1fr 1fr; } }
 
   ::-webkit-scrollbar { width: 5px; }
@@ -230,6 +259,10 @@
       <button class="nav-item" onclick="showView('email')">
         <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         Template email
+      </button>
+      <button class="nav-item" onclick="showView('debug')" id="nav-debug">
+        <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a2 2 0 0 1 2 2v1l1 1v2l-1 1v1a2 2 0 0 1-2 2h-1v1a4 4 0 0 1-8 0v-1H7a2 2 0 0 1-2-2v-1l-1-1v-2l1-1V9a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4z"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Debug & Test
       </button>
       <button class="nav-item" onclick="showView('settings')">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -470,11 +503,80 @@
       </div>
     </div>
 
+    <!-- DEBUG -->
+    <div class="view" id="view-debug">
+      <div class="page-header">
+        <div class="page-title">Debug & Test</div>
+        <div class="page-sub">Verifica il payload inviato ad Apify, la risposta grezza e la qualità dei dati</div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="dbgTab('test')">Test rapido</button>
+        <button class="tab-btn" onclick="dbgTab('payload')">Payload inviato</button>
+        <button class="tab-btn" onclick="dbgTab('raw')">Risposta grezza</button>
+        <button class="tab-btn" onclick="dbgTab('qualita')">Qualità dati</button>
+      </div>
+
+      <!-- TEST -->
+      <div class="tab-panel active" id="dbg-test">
+        <div class="card">
+          <div class="card-title"><div class="card-title-dot"></div>Test connessione Apify</div>
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Esegue una ricerca minimale (1 risultato) per verificare che API key, payload e risposta funzionino correttamente.</p>
+          <div class="grid2">
+            <div class="frow">
+              <label>Termine di ricerca test</label>
+              <input type="text" id="dbg-query" placeholder="es. ristorante" value="ristorante">
+            </div>
+            <div class="frow">
+              <label>Località test</label>
+              <input type="text" id="dbg-location" placeholder="es. Cagliari" value="Cagliari">
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="btn-dbg-test" onclick="debugTest()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Esegui test
+            </button>
+            <span style="font-size:0.78rem;color:var(--text3)">Consuma ~0.01$ di crediti Apify</span>
+          </div>
+          <div id="dbg-test-result" style="margin-top:1rem"></div>
+        </div>
+      </div>
+
+      <!-- PAYLOAD -->
+      <div class="tab-panel" id="dbg-payload">
+        <div class="card">
+          <div class="card-title"><div class="card-title-dot"></div>Ultimo payload inviato ad Apify</div>
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Questo è il JSON esatto che viene mandato all'actor di Apify. Aggiorna automaticamente dopo ogni ricerca.</p>
+          <div id="dbg-payload-box"><div style="font-size:0.85rem;color:var(--text3);padding:1rem 0">Nessuna ricerca effettuata ancora. Avvia una ricerca dalla schermata principale.</div></div>
+        </div>
+      </div>
+
+      <!-- RAW -->
+      <div class="tab-panel" id="dbg-raw">
+        <div class="card">
+          <div class="card-title"><div class="card-title-dot"></div>Risposta grezza Apify (primo risultato)</div>
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem">Mostra tutti i campi restituiti da Apify per il primo risultato — utile per vedere cosa è disponibile e cosa manca.</p>
+          <div id="dbg-raw-box"><div style="font-size:0.85rem;color:var(--text3);padding:1rem 0">Nessun dato disponibile.</div></div>
+        </div>
+      </div>
+
+      <!-- QUALITA -->
+      <div class="tab-panel" id="dbg-qualita">
+        <div class="card">
+          <div class="card-title"><div class="card-title-dot"></div>Analisi qualità dati</div>
+          <div id="dbg-qualita-box"><div style="font-size:0.85rem;color:var(--text3);padding:1rem 0">Nessun dato disponibile. Avvia una ricerca per analizzare i risultati.</div></div>
+        </div>
+      </div>
+
+    </div>
+
   </main>
 </div>
 
 <script>
 let risultati = [], comuni = [], isSearching = false;
+let dbgLastPayload = null, dbgLastRaw = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings(); renderChecklist(); renderStorico(); setupDrop();
@@ -564,9 +666,16 @@ async function avviaRicerca() {
   const key=localStorage.getItem('apify_key');
   if(!key){ showNotice('warn','API key Apify non configurata. Vai in <strong>Impostazioni</strong> per aggiungere la chiave, oppure usa "Demo dati".'); return; }
   if(isSearching) return;
-  const settore=document.getElementById('settore').value.trim()||'aziende';
-  const prov=document.getElementById('provincia').value;
-  const queries=comuni.length>0 ? comuni.map(c=>`${settore} ${c} ${prov}`.trim()) : [`${settore} ${prov||'Italia'}`.trim()];
+  const settore=document.getElementById('settore').value.trim();
+  const prov=document.getElementById('provincia').value.trim();
+  if(!settore && comuni.length===0 && !prov){
+    showNotice('warn','Inserisci almeno un <strong>settore</strong>, un <strong>comune</strong> o una <strong>regione</strong> prima di avviare la ricerca.');
+    return;
+  }
+  const settoreQ = settore || 'aziende';
+  const queries = comuni.length>0
+    ? comuni.map(c=>`${settoreQ} ${c} ${prov}`.trim().replace(/\s+/g,' '))
+    : [`${settoreQ} ${prov||'Italia'}`.trim()];
   setSearching(true);
   showNotice('info',`Ricerca in corso per <strong>${queries.length} quer${queries.length===1?'y':'ies'}</strong>${queries.length<=3?' ('+queries.join(', ')+')':""}. Attendere 1–3 minuti.`);
   clearResults();
@@ -586,6 +695,8 @@ async function avviaRicerca() {
       additionalInfo: false,
       exportPlaceUrls: false,
     };
+    dbgLastPayload = payload;
+    updateDbgPayload();
     const resp = await fetch(
       `https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}`,
       { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }
@@ -597,6 +708,7 @@ async function avviaRicerca() {
     }
     const data = await resp.json();
     if(!Array.isArray(data)) throw new Error('Risposta Apify non valida. Riprova.');
+    dbgLastRaw = data;
     processAndRender(data);
     salvaStorico(queries);
   } catch(err) {
@@ -634,18 +746,21 @@ function getDimensioniSelezionate() {
 function processAndRender(raw) {
   const emailF = document.getElementById('email-f').value;
   const dimSel = getDimensioniSelezionate();
+  const s = v => (v != null && String(v).trim()) ? String(v).trim() : '';
   risultati = (raw||[])
+    .filter(r => r && typeof r === 'object')
     .map(r => ({
-      nome: r.title||'N/D',
-      comune: r.city||r.addressLocality||'',
-      email: r.email||'',
-      tel: r.phone||'',
-      sito: r.website||'',
-      categoria: r.categoryName||'',
-      dipendenti: r.numberOfEmployees ? String(r.numberOfEmployees) : '—',
-      fatturato: '—',
+      nome:       s(r.title)          || s(r.name)            || 'N/D',
+      comune:     s(r.city)           || s(r.addressLocality)  || s(r.address)?.split(',').pop()?.trim() || '—',
+      email:      s(r.email),
+      tel:        s(r.phone)          || s(r.phoneUnformatted) || '—',
+      sito:       s(r.website)        || s(r.url)              || '',
+      categoria:  s(r.categoryName)   || s(r.category)         || s(r.types?.[0]) || '—',
+      dipendenti: r.numberOfEmployees != null ? String(r.numberOfEmployees) : '—',
+      fatturato:  '—',
       dimensione: stimaDimensione(r),
-      recensioni: r.reviewsCount||0
+      recensioni: Number(r.reviewsCount)||0,
+      indirizzo:  s(r.address) || s(r.street) || '',
     }))
     .filter(r => emailF !== 'yes' || r.email)
     .filter(r => dimSel.length === 0 || dimSel.includes(r.dimensione));
@@ -690,12 +805,12 @@ function renderRisultati() {
       <div class="result-item">
         <div>
           <div class="result-name">${r.nome}</div>
-          <div class="result-sub">📍 ${r.comune} · ${r.categoria}</div>
-          ${r.sito?`<a class="result-link" href="https://${r.sito}" target="_blank">${r.sito}</a>`:''}
+          <div class="result-sub">📍 ${r.comune && r.comune!=="—" ? r.comune : r.indirizzo||"—"} · ${r.categoria}</div>
+          ${r.sito?`<a class="result-link" href="${r.sito.startsWith('http')?r.sito:'https://'+r.sito}" target="_blank">${r.sito}</a>`:''}
         </div>
         <div>
           ${r.email?`<div style="font-size:0.82rem"><a href="mailto:${r.email}" style="color:var(--accent);text-decoration:none">${r.email}</a></div>`:`<span class="badge badge-warn" style="margin-top:2px">no email</span>`}
-          <div class="stat-lbl" style="margin-top:5px">${r.tel}</div>
+          <div class="stat-lbl" style="margin-top:5px">${r.tel && r.tel!=="—" ? r.tel : ""}</div>
         </div>
         <div>
           <div class="stat-lbl">Dimensione</div>
@@ -1031,6 +1146,175 @@ async function testKey() {
 function clearKey() { localStorage.removeItem('apify_key'); document.getElementById('apify-key-input').value=''; updateApiStatus(false); showFeedback('ok','Chiave rimossa.'); }
 function savePrefs() { const s=document.getElementById('pref-studio').value.trim(); localStorage.setItem('pref_studio',s); showFeedback('ok','Preferenze salvate.'); }
 function showFeedback(type,msg) { const map={ok:'badge-ok',warn:'badge-warn',info:'badge-info'}; document.getElementById('key-feedback').innerHTML=`<span class="badge ${map[type]||'badge-info'}">${msg}</span>`; }
+
+// ── DEBUG ──────────────────────────────────────────────────────────
+function dbgTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('onclick')?.includes("'"+id+"'")));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'dbg-'+id));
+}
+
+function syntaxHL(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/("(\u[a-zA-Z0-9]{4}|\[^u]|[^\"])*"(\s*:)?|(true|false|null)|-?\d+(\.\d*)?([eE][+\-]?\d+)?)/g, match => {
+    if(/^"/.test(match)) return match.endsWith(':') ? `<span class="key">${match}</span>` : `<span class="str">${match}</span>`;
+    if(/true|false/.test(match)) return `<span class="bool">${match}</span>`;
+    if(/null/.test(match)) return `<span class="null">${match}</span>`;
+    return `<span class="num">${match}</span>`;
+  });
+}
+
+function updateDbgPayload() {
+  const el = document.getElementById('dbg-payload-box');
+  if(!el) return;
+  if(!dbgLastPayload) { el.innerHTML = '<div style="font-size:0.85rem;color:var(--text3);padding:1rem 0">Nessuna ricerca effettuata ancora.</div>'; return; }
+  el.innerHTML = `<div class="dbg-box">${syntaxHL(dbgLastPayload)}</div>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn btn-sm" onclick="navigator.clipboard.writeText(JSON.stringify(dbgLastPayload,null,2))">Copia JSON</button>
+      <span style="font-size:0.75rem;color:var(--text3);align-self:center">${Object.keys(dbgLastPayload).length} campi • ${JSON.stringify(dbgLastPayload).length} bytes</span>
+    </div>`;
+}
+
+function updateDbgRaw() {
+  const el = document.getElementById('dbg-raw-box');
+  if(!el || !dbgLastRaw?.length) return;
+  const primo = dbgLastRaw[0];
+  const campi = Object.keys(primo);
+  const campiVuoti = campi.filter(k => primo[k] == null || primo[k] === '' || primo[k] === false);
+  el.innerHTML = `
+    <div style="margin-bottom:0.75rem">
+      <span class="badge badge-info">${campi.length} campi totali</span>
+      <span class="badge badge-warn" style="margin-left:6px">${campiVuoti.length} vuoti/null</span>
+      <span class="badge badge-ok" style="margin-left:6px">${campi.length - campiVuoti.length} valorizzati</span>
+    </div>
+    <div class="dbg-box">${syntaxHL(primo)}</div>
+    <div style="margin-top:8px">
+      <button class="btn btn-sm" onclick="navigator.clipboard.writeText(JSON.stringify(dbgLastRaw[0],null,2))">Copia primo risultato</button>
+    </div>`;
+}
+
+function updateDbgQualita() {
+  const el = document.getElementById('dbg-qualita-box');
+  if(!el || !risultati.length) return;
+  const tot = risultati.length;
+  const fields = [
+    { label:'Nome',       key:'nome',       check: r => r.nome && r.nome !== 'N/D' },
+    { label:'Comune',     key:'comune',     check: r => r.comune && r.comune !== '—' },
+    { label:'Email',      key:'email',      check: r => !!r.email },
+    { label:'Telefono',   key:'tel',        check: r => r.tel && r.tel !== '—' },
+    { label:'Sito web',   key:'sito',       check: r => !!r.sito },
+    { label:'Categoria',  key:'categoria',  check: r => r.categoria && r.categoria !== '—' },
+    { label:'Indirizzo',  key:'indirizzo',  check: r => !!r.indirizzo },
+  ];
+  const dimCount = { micro:0, piccola:0, media:0, grande:0 };
+  risultati.forEach(r => { if(dimCount[r.dimensione] !== undefined) dimCount[r.dimensione]++; });
+  const nEmail = risultati.filter(r=>r.email).length;
+
+  el.innerHTML = `
+    <div class="dbg-stats">
+      <div class="dbg-stat"><div class="dbg-stat-n">${tot}</div><div class="dbg-stat-l">Aziende trovate</div></div>
+      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--success)">${nEmail}</div><div class="dbg-stat-l">Con email</div></div>
+      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--warn)">${tot-nEmail}</div><div class="dbg-stat-l">Senza email</div></div>
+      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--accent)">${Math.round(nEmail/tot*100)}%</div><div class="dbg-stat-l">Tasso email</div></div>
+    </div>
+    <table class="dbg-field-table">
+      <thead><tr><th>Campo</th><th>Compilati</th><th>Mancanti</th><th>Copertura</th></tr></thead>
+      <tbody>
+        ${fields.map(f => {
+          const ok = risultati.filter(f.check).length;
+          const pct = Math.round(ok/tot*100);
+          const cls = pct >= 70 ? '' : pct >= 40 ? 'mid' : 'low';
+          return `<tr>
+            <td style="font-weight:500">${f.label}</td>
+            <td style="color:var(--success)">${ok}</td>
+            <td style="color:${tot-ok>0?'var(--warn)':'var(--text3)'}">${tot-ok}</td>
+            <td style="min-width:120px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="dbg-pct-bar" style="flex:1"><div class="dbg-pct-fill ${cls}" style="width:${pct}%"></div></div>
+                <span style="font-size:0.78rem;font-weight:500;min-width:32px;text-align:right">${pct}%</span>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:1.25rem">
+      <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Distribuzione dimensione impresa</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${Object.entries(dimCount).map(([k,v])=>`
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;text-align:center">
+            <div style="font-size:1.1rem;font-weight:600">${v}</div>
+            <div style="font-size:0.72rem;color:var(--text2);margin-top:2px">${DIM_LABELS[k]||k}</div>
+            <div style="font-size:0.7rem;color:var(--text3)">${tot>0?Math.round(v/tot*100):0}%</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// Aggiorna automaticamente qualità e raw quando cambiano i risultati
+const _origRender = renderRisultati;
+renderRisultati = function() {
+  _origRender();
+  updateDbgRaw();
+  updateDbgQualita();
+};
+
+async function debugTest() {
+  const key = localStorage.getItem('apify_key');
+  if(!key) { document.getElementById('dbg-test-result').innerHTML = '<div class="notice notice-warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>API key non configurata. Vai in Impostazioni.</span></div>'; return; }
+  const q = document.getElementById('dbg-query').value.trim() || 'ristorante';
+  const loc = document.getElementById('dbg-location').value.trim() || 'Cagliari';
+  const btn = document.getElementById('btn-dbg-test');
+  btn.innerHTML = '<div class="loader"></div> Testing…'; btn.disabled = true;
+  const res = document.getElementById('dbg-test-result');
+  const t0 = Date.now();
+  const payload = { searchStringsArray:[`${q} ${loc}`], maxCrawledPlacesPerSearch:3, language:'it', maxImages:0, maxReviews:0, includeHistogram:false, includeOpeningHours:false, includePeopleAlsoSearch:false, additionalInfo:false, exportPlaceUrls:false };
+  try {
+    const resp = await fetch(`https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=3`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const elapsed = ((Date.now()-t0)/1000).toFixed(1);
+    if(!resp.ok) {
+      let msg = 'HTTP '+resp.status;
+      try { const e=await resp.json(); if(e?.error?.message) msg+=': '+e.error.message; } catch {}
+      throw new Error(msg);
+    }
+    const data = await resp.json();
+    if(!Array.isArray(data)||!data.length) throw new Error('Nessun risultato restituito');
+    dbgLastRaw = data;
+    updateDbgRaw();
+    const primo = data[0];
+    const campiOk = ['title','address','phone','website','email','categoryName','city','reviewsCount'].filter(k => primo[k]);
+    res.innerHTML = `
+      <div class="notice notice-ok" style="margin-bottom:1rem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>✅ Connessione OK — ${data.length} risultati in ${elapsed}s</span>
+      </div>
+      <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px">Primo risultato: <span style="color:var(--accent)">${primo.title||'N/D'}</span></div>
+      <table class="dbg-field-table" style="margin-bottom:1rem">
+        <thead><tr><th>Campo Apify</th><th>Valore</th><th>Mappato in app come</th></tr></thead>
+        <tbody>
+          ${[
+            ['title',        primo.title,           'Nome azienda'],
+            ['city',         primo.city||primo.addressLocality, 'Comune'],
+            ['address',      primo.address,          'Indirizzo'],
+            ['phone',        primo.phone,            'Telefono'],
+            ['email',        primo.email,            'Email'],
+            ['website',      primo.website,          'Sito web'],
+            ['categoryName', primo.categoryName,     'Categoria'],
+            ['reviewsCount', primo.reviewsCount,     'Recensioni (→ stima dim.)'],
+            ['numberOfEmployees', primo.numberOfEmployees, 'Dipendenti'],
+          ].map(([k,v,mapped])=>`<tr>
+            <td style="font-family:var(--mono);font-size:0.78rem;color:var(--text3)">${k}</td>
+            <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v!=null&&v!==''?`<span style="color:var(--success)">${String(v).slice(0,60)}</span>`:'<span style="color:var(--text3);font-style:italic">—  non disponibile</span>'}</td>
+            <td style="font-size:0.78rem;color:var(--text2)">${mapped}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="dbg-box" style="max-height:200px">${syntaxHL(primo)}</div>`;
+    updateDbgQualita();
+  } catch(err) {
+    res.innerHTML = `<div class="notice notice-warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Errore: ${err.message}</span></div>`;
+  }
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Esegui test'; btn.disabled = false;
+}
 </script>
 </body>
 </html>
