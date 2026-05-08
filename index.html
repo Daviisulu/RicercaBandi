@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BandiProspect — Ricerca Aziende per Finanziamenti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.15);
+    --accent: #2563eb;
+    --accent2: #1d4ed8;
+    --accent-light: #eff6ff;
+    --accent-mid: #bfdbfe;
+    --text: #111827;
+    --text2: #4b5563;
+    --text3: #9ca3af;
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+    --success-mid: #bbf7d0;
+    --warn: #d97706;
+    --warn-light: #fffbeb;
+    --warn-mid: #fde68a;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --danger-mid: #fecaca;
+    --sidebar-w: 232px;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
+
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { flex: 1; min-width: 0; padding: 2rem 2.5rem; }
+
+  .logo { padding: 1.4rem 1.25rem 1rem; border-bottom: 1px solid var(--border); }
+  .logo-mark { font-size: 1.05rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .logo-icon { width: 26px; height: 26px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-icon svg { width: 14px; height: 14px; stroke: #fff; fill: none; }
+  .logo-sub { font-size: 0.71rem; color: var(--text3); margin-top: 3px; }
+  .nav { padding: 0.75rem; flex: 1; }
+  .nav-section { font-size: 0.65rem; font-weight: 600; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; padding: 0.7rem 0.5rem 0.35rem; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 0.52rem 0.75rem; border-radius: var(--radius); font-size: 0.88rem; color: var(--text2); cursor: pointer; transition: all 0.12s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; font-family: var(--font); }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+  .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
+  .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .api-status { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text3); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .status-dot.ok { background: var(--success); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .page-header { margin-bottom: 1.75rem; }
+  .page-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+  .page-sub { font-size: 0.88rem; color: var(--text2); margin-top: 3px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.4rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+  .card-title { font-size: 0.7rem; font-weight: 600; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 7px; }
+  .card-title-dot { width: 3px; height: 13px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .frow { display: flex; flex-direction: column; gap: 5px; margin-bottom: 0.85rem; }
+  .frow:last-child { margin-bottom: 0; }
+  label { font-size: 0.78rem; font-weight: 500; color: var(--text2); }
+  input, select, textarea { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.52rem 0.75rem; font-family: var(--font); font-size: 0.88rem; color: var(--text); outline: none; transition: border-color 0.12s, box-shadow 0.12s; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  .range-row { display: flex; align-items: center; gap: 8px; }
+  .range-row input { flex: 1; }
+  .range-sep { color: var(--text3); font-size: 0.82rem; flex-shrink: 0; }
+
+  /* COMUNI BOX */
+  .comuni-box { border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg); overflow: hidden; }
+  .comuni-toolbar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
+  .comuni-toolbar input { flex: 1; min-width: 150px; }
+  .tags-area { padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 6px; min-height: 48px; align-items: flex-start; align-content: flex-start; }
+  .tags-placeholder { font-size: 0.8rem; color: var(--text3); align-self: center; padding: 4px 0; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); border-radius: 20px; padding: 3px 9px; font-size: 0.78rem; font-weight: 500; }
+  .tag-rm { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; opacity: 0.55; }
+  .tag-rm:hover { opacity: 1; }
+  .comuni-footer { padding: 7px 12px; border-top: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .comuni-count { font-size: 0.75rem; color: var(--text3); }
+
+  /* IMPORT */
+  .import-section { margin-top: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .import-panel { border: 1px solid var(--border); border-radius: var(--radius); padding: 0.9rem 1rem; background: var(--surface); }
+  .import-panel-title { font-size: 0.72rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+  .drop-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 1rem; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--bg); }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); }
+  .drop-zone p { font-size: 0.78rem; color: var(--text2); line-height: 1.5; margin-top: 4px; }
+  .drop-zone strong { color: var(--accent); }
+  #file-comuni-input { display: none; }
+  .import-textarea { font-family: var(--mono); font-size: 0.8rem; resize: vertical; min-height: 72px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.52rem 1rem; border-radius: var(--radius); font-family: var(--font); font-size: 0.86rem; font-weight: 500; cursor: pointer; transition: all 0.12s; border: 1px solid var(--border2); background: var(--surface); color: var(--text); white-space: nowrap; }
+  .btn:hover { background: var(--surface2); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+  .btn-danger { color: var(--danger); border-color: var(--danger-mid); }
+  .btn-danger:hover { background: var(--danger-light); }
+  .btn-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; }
+  .badge-ok { background: var(--success-light); color: var(--success); border: 1px solid var(--success-mid); }
+  .badge-warn { background: var(--warn-light); color: var(--warn); border: 1px solid var(--warn-mid); }
+  .badge-info { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
+  .badge-err { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-mid); }
+
+  .notice { padding: 0.7rem 1rem; border-radius: var(--radius); font-size: 0.83rem; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .notice svg { flex-shrink: 0; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .notice-warn { background: var(--warn-light); color: var(--warn); border: 1px solid var(--warn-mid); }
+  .notice-info { background: var(--accent-light); color: var(--accent2); border: 1px solid var(--accent-mid); }
+  .notice-ok { background: var(--success-light); color: var(--success); border: 1px solid var(--success-mid); }
+
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px; }
+  .results-count { font-size: 0.9rem; font-weight: 600; }
+  .results-list { display: flex; flex-direction: column; gap: 6px; }
+  .result-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1.6fr) 90px 110px auto; gap: 1rem; align-items: center; box-shadow: var(--shadow-sm); transition: box-shadow 0.12s, border-color 0.12s; }
+  .result-item:hover { box-shadow: var(--shadow); border-color: var(--border2); }
+  .result-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result-sub { font-size: 0.76rem; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result-link { font-size: 0.74rem; color: var(--accent); margin-top: 2px; text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .result-link:hover { text-decoration: underline; }
+  .stat-lbl { font-size: 0.67rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-val { font-size: 0.85rem; font-weight: 500; margin-top: 2px; }
+  .result-actions { display: flex; gap: 5px; }
+
+  .empty { text-align: center; padding: 3.5rem 2rem; color: var(--text3); }
+  .empty-icon { font-size: 2.2rem; margin-bottom: 0.6rem; opacity: 0.4; }
+  .empty-text { font-size: 0.88rem; }
+  .loader { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(37,99,235,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 7px; box-shadow: var(--shadow-sm); transition: box-shadow 0.12s; }
+  .history-item:hover { box-shadow: var(--shadow); }
+  .history-title { font-weight: 600; font-size: 0.88rem; }
+  .history-meta { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+  .email-box { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 1.25rem; font-family: var(--mono); font-size: 0.82rem; line-height: 1.85; color: var(--text); white-space: pre-wrap; margin-top: 0.75rem; }
+  .subj-row { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.55rem 0.75rem; font-size: 0.84rem; margin-top: 0.5rem; }
+  .subj-label { color: var(--text3); font-size: 0.75rem; flex-shrink: 0; font-weight: 500; }
+  .checklist-item { display: flex; align-items: center; gap: 10px; padding: 0.65rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; color: var(--text2); cursor: pointer; }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item input { width: 15px; height: 15px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid var(--border); gap: 1rem; }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 0.88rem; font-weight: 500; }
+  .setting-desc { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+  .divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+  /* DIMENSIONE IMPRESA */
+  .dim-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+  .dim-chip { cursor: pointer; }
+  .dim-chip input { display: none; }
+  .dim-chip-inner {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 0.6rem 0.85rem;
+    border: 1.5px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg);
+    transition: all 0.12s;
+    height: 100%;
+  }
+  .dim-chip:hover .dim-chip-inner { border-color: var(--accent-mid); background: var(--accent-light); }
+  .dim-chip input:checked + .dim-chip-inner { border-color: var(--accent); background: var(--accent-light); }
+  .dim-chip-label { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+  .dim-chip input:checked + .dim-chip-inner .dim-chip-label { color: var(--accent2); }
+  .dim-chip-desc { font-size: 0.72rem; color: var(--text3); line-height: 1.3; }
+  .dim-chip input:checked + .dim-chip-inner .dim-chip-desc { color: var(--accent); opacity: 0.8; }
+  .badge-dim-micro  { background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe; }
+  .badge-dim-piccola{ background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+  .badge-dim-media  { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+  .badge-dim-grande { background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; }
+  @media (max-width: 720px) { .dim-grid { grid-template-columns: 1fr 1fr; } }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 720px) {
+    .sidebar { display: none; }
+    .main { padding: 1rem; }
+    .grid2, .grid3, .import-section { grid-template-columns: 1fr; }
+    .result-item { grid-template-columns: 1fr auto; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        BandiProspect
+      </div>
+      <div class="logo-sub">Ricerca aziende per finanziamenti</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Principale</div>
+      <button class="nav-item active" onclick="showView('cerca')">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Nuova ricerca
+      </button>
+      <button class="nav-item" onclick="showView('storico')">
+        <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        Storico ricerche
+      </button>
+      <div class="nav-section" style="margin-top:6px">Strumenti</div>
+      <button class="nav-item" onclick="showView('email')">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Template email
+      </button>
+      <button class="nav-item" onclick="showView('settings')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Impostazioni
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="api-status">
+        <div class="status-dot" id="dot-apify"></div>
+        <span id="label-apify">Apify: non configurato</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- CERCA -->
+    <div class="view active" id="view-cerca">
+      <div class="page-header">
+        <div class="page-title">Nuova ricerca</div>
+        <div class="page-sub">Configura i filtri in base al bando attivo e avvia la ricerca</div>
+      </div>
+      <div id="notice-area"></div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Bando corrente</div>
+        <div class="grid2">
+          <div class="frow"><label>Nome bando</label><input type="text" id="bando-nome" placeholder="es. PSR Sardegna 2025 — Misura 4.1"></div>
+          <div class="frow"><label>Scadenza</label><input type="date" id="bando-scad"></div>
+        </div>
+        <div class="frow"><label>Note / target ideale</label><textarea id="bando-note" rows="2" placeholder="es. Aziende agricole con meno di 20 dipendenti…"></textarea></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Filtri geografici</div>
+        <div class="grid2" style="margin-bottom:0.85rem">
+          <div class="frow" style="margin-bottom:0">
+            <label>Regione / Provincia</label>
+            <select id="provincia">
+              <option value="">— Tutte le regioni —</option>
+              <option>Sardegna</option><option>Sicilia</option><option>Calabria</option>
+              <option>Campania</option><option>Puglia</option><option>Basilicata</option>
+              <option>Molise</option><option>Abruzzo</option><option>Lazio</option>
+              <option>Toscana</option><option>Lombardia</option><option>Veneto</option>
+              <option>Piemonte</option><option>Emilia-Romagna</option><option>Marche</option>
+              <option>Umbria</option><option>Friuli-Venezia Giulia</option><option>Liguria</option>
+            </select>
+          </div>
+          <div class="frow" style="margin-bottom:0">
+            <label>Abitanti del comune (range)</label>
+            <div class="range-row">
+              <input type="number" id="ab-min" placeholder="Min" value="0">
+              <span class="range-sep">—</span>
+              <input type="number" id="ab-max" placeholder="Max" value="50000">
+              <span style="font-size:0.76rem;color:var(--text3);white-space:nowrap">ab.</span>
+            </div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="frow" style="margin-bottom:0">
+          <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+            <span>Comuni target</span>
+            <span id="comuni-count-lbl" style="font-size:0.72rem;color:var(--text3);font-weight:400"></span>
+          </label>
+          <div class="comuni-box">
+            <div class="comuni-toolbar">
+              <input type="text" id="comune-in" placeholder="Digita un comune e premi Invio…">
+              <button class="btn btn-sm btn-primary" onclick="addComuneManuale()">+ Aggiungi</button>
+              <button class="btn btn-sm" onclick="document.getElementById('file-comuni-input').click()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Importa file
+              </button>
+              <button class="btn btn-sm btn-danger" id="btn-clear-comuni" style="display:none" onclick="clearComuni()">Svuota tutti</button>
+              <input type="file" id="file-comuni-input" accept=".csv,.txt" onchange="importaFileComuni(this)">
+            </div>
+            <div class="tags-area" id="comuni-tags"><span class="tags-placeholder">Nessun comune aggiunto</span></div>
+            <div class="comuni-footer">
+              <span class="comuni-count" id="comuni-footer-count">0 comuni</span>
+              <span style="font-size:0.71rem;color:var(--text3)">Accetta .csv e .txt — un comune per riga o separati da virgola</span>
+            </div>
+          </div>
+          <div class="import-section">
+            <div class="import-panel">
+              <div class="import-panel-title">Trascina o carica un file</div>
+              <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-comuni-input').click()">
+                <div style="font-size:1.5rem;opacity:0.4">📂</div>
+                <p>Trascina qui un file <strong>.csv</strong> o <strong>.txt</strong><br>con l'elenco dei comuni</p>
+              </div>
+            </div>
+            <div class="import-panel">
+              <div class="import-panel-title">Incolla testo direttamente</div>
+              <textarea class="import-textarea" id="comuni-paste" placeholder="Es:&#10;Cagliari&#10;Nuoro, Sassari&#10;Oristano; Orgosolo&#10;Jerzu"></textarea>
+              <div class="btn-row" style="margin-top:6px">
+                <button class="btn btn-sm btn-primary" onclick="importaDaTesto()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Importa dal testo
+                </button>
+                <span style="font-size:0.72rem;color:var(--text3)">Virgola, punto-e-virgola o a-capo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Filtri azienda</div>
+        <div class="grid3">
+          <div class="frow"><label>Settore / Categoria</label><input type="text" id="settore" placeholder="es. agricoltura, ristorante…"></div>
+          <div class="frow"><label>Codice ATECO</label><input type="text" id="ateco" placeholder="es. 01.1, 56.10…"></div>
+          <div class="frow"><label>Solo con email</label><select id="email-f"><option value="yes">Sì — solo con email</option><option value="no">No — tutte</option></select></div>
+        </div>
+
+        <!-- DIMENSIONE IMPRESA -->
+        <div class="frow">
+          <label style="margin-bottom:8px">Dimensione impresa <span style="font-weight:400;color:var(--text3)">(classificazione UE — seleziona una o più)</span></label>
+          <div class="dim-grid" id="dim-filter">
+            <label class="dim-chip">
+              <input type="checkbox" value="micro" checked>
+              <span class="dim-chip-inner">
+                <span class="dim-chip-label">Micro</span>
+                <span class="dim-chip-desc">&lt; 10 dip. · &lt; 2M€</span>
+              </span>
+            </label>
+            <label class="dim-chip">
+              <input type="checkbox" value="piccola" checked>
+              <span class="dim-chip-inner">
+                <span class="dim-chip-label">Piccola</span>
+                <span class="dim-chip-desc">10–49 dip. · &lt; 10M€</span>
+              </span>
+            </label>
+            <label class="dim-chip">
+              <input type="checkbox" value="media" checked>
+              <span class="dim-chip-inner">
+                <span class="dim-chip-label">Media</span>
+                <span class="dim-chip-desc">50–249 dip. · &lt; 50M€</span>
+              </span>
+            </label>
+            <label class="dim-chip">
+              <input type="checkbox" value="grande">
+              <span class="dim-chip-inner">
+                <span class="dim-chip-label">Grande</span>
+                <span class="dim-chip-desc">≥ 250 dipendenti</span>
+              </span>
+            </label>
+          </div>
+          <div style="margin-top:6px;padding:7px 10px;background:var(--warn-light);border:1px solid var(--warn-mid);border-radius:var(--radius);font-size:0.76rem;color:var(--warn);display:flex;align-items:flex-start;gap:6px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Google Maps non fornisce dati ufficiali su dipendenti e fatturato. La classificazione viene <strong>stimata</strong> dal numero di recensioni e dalla tipologia. Per dati certi integrare con Atoka o InfoCamere.</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="grid2">
+          <div class="frow"><label>N° dipendenti (override manuale)</label><div class="range-row"><input type="number" id="dip-min" placeholder="Min" value="0"><span class="range-sep">—</span><input type="number" id="dip-max" placeholder="Max" value="249"></div></div>
+          <div class="frow"><label>Fatturato stimato (€)</label><div class="range-row"><input type="number" id="fat-min" placeholder="Min" value="0"><span class="range-sep">—</span><input type="number" id="fat-max" placeholder="Max" value="50000000"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Parametri ricerca</div>
+        <div class="grid2">
+          <div class="frow"><label>Max risultati</label><input type="number" id="max-res" value="50" min="10" max="500"></div>
+          <div class="frow"><label>Fonte dati</label><select id="fonte"><option value="gmaps">Google Maps (consigliato)</option><option value="pggialle">Pagine Gialle</option></select></div>
+        </div>
+        <div class="btn-row" style="margin-top:0.5rem">
+          <button class="btn btn-primary" id="btn-search" onclick="avviaRicerca()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Avvia ricerca
+          </button>
+          <button class="btn" onclick="caricaDemo()">Demo dati</button>
+          <button class="btn" id="btn-export" style="display:none" onclick="exportXLSX()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Esporta Excel
+          </button>
+        </div>
+      </div>
+      <div id="results-area"></div>
+    </div>
+
+    <!-- STORICO -->
+    <div class="view" id="view-storico">
+      <div class="page-header"><div class="page-title">Storico ricerche</div><div class="page-sub">Le tue ultime 30 ricerche (salvate nel browser)</div></div>
+      <div id="storico-list"></div>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="view" id="view-email">
+      <div class="page-header"><div class="page-title">Template email</div><div class="page-sub">Genera l'email di presentazione per il tuo bando</div></div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Parametri email</div>
+        <div class="grid2">
+          <div class="frow"><label>Nome bando</label><input type="text" id="tpl-bando" placeholder="es. PSR Sardegna 2025"></div>
+          <div class="frow"><label>Il tuo nome / studio</label><input type="text" id="tpl-mitt" placeholder="es. Mario Rossi — Studio Consulenza"></div>
+        </div>
+        <div class="frow"><label>Beneficio principale del bando</label><input type="text" id="tpl-ben" placeholder="es. fino al 50% a fondo perduto per acquisto macchinari"></div>
+        <div class="frow"><label>Nome azienda destinataria</label><input type="text" id="tpl-dest" placeholder="es. Agriturismo Tre Stelle"></div>
+        <div class="btn-row" style="margin-top:0.5rem">
+          <button class="btn btn-primary" onclick="genTemplate()">Genera template</button>
+          <button class="btn" id="btn-copy-email" style="display:none" onclick="copyEmail()">Copia testo</button>
+        </div>
+        <div id="email-sogg" style="display:none;margin-top:1rem"></div>
+        <div id="email-body" style="display:none"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Checklist invio</div>
+        <div id="checklist"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view" id="view-settings">
+      <div class="page-header"><div class="page-title">Impostazioni</div><div class="page-sub">Configura la API key e le preferenze</div></div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>API Apify</div>
+        <div class="notice notice-info" style="margin-bottom:1rem">
+          <svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          La API key è salvata solo nel tuo browser. Non viene trasmessa a nessun server esterno tranne Apify.
+        </div>
+        <div class="frow"><label>Apify API Key</label><input type="password" id="apify-key-input" placeholder="apify_api_xxxxxxxxxxxx"></div>
+        <div class="btn-row" style="margin-top:0.5rem">
+          <button class="btn btn-primary" onclick="saveKey()">Salva chiave</button>
+          <button class="btn" onclick="testKey()">Testa connessione</button>
+          <button class="btn btn-danger" onclick="clearKey()">Rimuovi</button>
+        </div>
+        <div id="key-feedback" style="margin-top:0.75rem"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-dot"></div>Preferenze</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Studio / Nome mittente</div><div class="setting-desc">Usato nei template email</div></div>
+          <input type="text" id="pref-studio" placeholder="es. Studio Rossi" style="max-width:220px">
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Svuota storico ricerche</div><div class="setting-desc">Elimina tutte le ricerche salvate localmente</div></div>
+          <button class="btn btn-sm btn-danger" onclick="clearStorico()">Svuota storico</button>
+        </div>
+        <div class="btn-row" style="margin-top:1rem"><button class="btn btn-primary" onclick="savePrefs()">Salva preferenze</button></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let risultati = [], comuni = [], isSearching = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSettings(); renderChecklist(); renderStorico(); setupDrop();
+  document.getElementById('comune-in').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); addComuneManuale(); } });
+});
+
+function loadSettings() {
+  const key = localStorage.getItem('apify_key')||'';
+  const studio = localStorage.getItem('pref_studio')||'';
+  const ki=document.getElementById('apify-key-input'); if(ki) ki.value=key;
+  const ps=document.getElementById('pref-studio'); if(ps) ps.value=studio;
+  const tm=document.getElementById('tpl-mitt'); if(tm) tm.value=studio;
+  updateApiStatus(!!key);
+}
+function updateApiStatus(ok) {
+  document.getElementById('dot-apify').classList.toggle('ok',ok);
+  document.getElementById('label-apify').textContent = ok ? 'Apify: configurato' : 'Apify: non configurato';
+}
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(btn=>{ if(btn.getAttribute('onclick')?.includes("'"+id+"'")) btn.classList.add('active'); });
+  if(id==='storico') renderStorico();
+}
+
+// ── COMUNI ──
+function addComuneManuale() {
+  const inp=document.getElementById('comune-in');
+  const v=inp.value.trim(); if(!v) return;
+  addComuni(v.split(/[,;]+/).map(s=>s.trim()).filter(Boolean));
+  inp.value=''; inp.focus();
+}
+function addComuni(lista) {
+  let n=0;
+  lista.forEach(c=>{ const nome=c.trim(); if(nome && nome.length>1 && !comuni.find(x=>x.toLowerCase()===nome.toLowerCase())){ comuni.push(nome); n++; } });
+  renderComuni(); return n;
+}
+function removeComune(idx) { comuni.splice(idx,1); renderComuni(); }
+function clearComuni() { comuni=[]; renderComuni(); }
+function renderComuni() {
+  const w=document.getElementById('comuni-tags');
+  w.innerHTML = comuni.length
+    ? comuni.map((c,i)=>`<span class="tag">${c}<button class="tag-rm" onclick="removeComune(${i})" aria-label="Rimuovi">×</button></span>`).join('')
+    : '<span class="tags-placeholder">Nessun comune aggiunto</span>';
+  const n=comuni.length;
+  const lbl=document.getElementById('comuni-count-lbl'); if(lbl) lbl.textContent=n>0?n+' comuni':'';
+  const foot=document.getElementById('comuni-footer-count'); if(foot) foot.textContent=n+' comun'+(n===1?'e':'i');
+  const clr=document.getElementById('btn-clear-comuni'); if(clr) clr.style.display=n>0?'inline-flex':'none';
+}
+
+// ── IMPORT FILE ──
+function importaFileComuni(input) {
+  const file=input.files[0]; if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext!=='csv'&&ext!=='txt'){ showNotice('warn','Formato non supportato. Usa .csv o .txt.'); return; }
+  const reader=new FileReader();
+  reader.onload=e=>{ const n=addComuni(parseTesto(e.target.result)); showNotice('ok',`Importati <strong>${n} comuni</strong> da <em>${file.name}</em>. Totale: ${comuni.length}.`); };
+  reader.readAsText(file,'UTF-8'); input.value='';
+}
+function importaDaTesto() {
+  const testo=document.getElementById('comuni-paste').value.trim();
+  if(!testo){ showNotice('warn','Il campo testo è vuoto.'); return; }
+  const n=addComuni(parseTesto(testo));
+  document.getElementById('comuni-paste').value='';
+  showNotice('ok',`Importati <strong>${n} comuni</strong> dal testo. Totale: ${comuni.length}.`);
+}
+function parseTesto(testo) {
+  return testo.split(/[\n\r,;|\t]+/).map(s=>s.replace(/["']/g,'').trim()).filter(s=>s.length>1&&s.length<80&&/[a-zA-ZÀ-ÿ]/.test(s));
+}
+function setupDrop() {
+  const z=document.getElementById('drop-zone'); if(!z) return;
+  ['dragenter','dragover'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.add('drag-over');}));
+  ['dragleave','drop'].forEach(ev=>z.addEventListener(ev,e=>{e.preventDefault();z.classList.remove('drag-over');}));
+  z.addEventListener('drop',e=>{
+    const file=e.dataTransfer?.files[0]; if(!file) return;
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext!=='csv'&&ext!=='txt'){ showNotice('warn','Formato non supportato. Usa .csv o .txt.'); return; }
+    const reader=new FileReader();
+    reader.onload=ev=>{ const n=addComuni(parseTesto(ev.target.result)); showNotice('ok',`Importati <strong>${n} comuni</strong> da <em>${file.name}</em>. Totale: ${comuni.length}.`); };
+    reader.readAsText(file,'UTF-8');
+  });
+}
+
+// ── SEARCH ──
+async function avviaRicerca() {
+  const key=localStorage.getItem('apify_key');
+  if(!key){ showNotice('warn','API key Apify non configurata. Vai in <strong>Impostazioni</strong> per aggiungere la chiave, oppure usa "Demo dati".'); return; }
+  if(isSearching) return;
+  const settore=document.getElementById('settore').value.trim()||'aziende';
+  const prov=document.getElementById('provincia').value;
+  const queries=comuni.length>0 ? comuni.map(c=>`${settore} ${c} ${prov}`.trim()) : [`${settore} ${prov||'Italia'}`.trim()];
+  setSearching(true);
+  showNotice('info',`Ricerca in corso per <strong>${queries.length} quer${queries.length===1?'y':'ies'}</strong>${queries.length<=3?' ('+queries.join(', ')+')':""}. Attendere 1–3 minuti.`);
+  clearResults();
+  try {
+    const maxItems=parseInt(document.getElementById('max-res').value)||50;
+    const resp=await fetch(`https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ searchStringsArray:queries, maxCrawledPlacesPerSearch:Math.ceil(maxItems/queries.length), language:'it', countryCode:'IT', includeHistogram:false, includeOpeningHours:false })
+    });
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    processAndRender(await resp.json()); salvaStorico(queries);
+  } catch(err) { showNotice('warn','Errore: '+err.message+'. Controlla la API key e riprova.'); }
+  finally { setSearching(false); }
+}
+function setSearching(v) {
+  isSearching=v;
+  const btn=document.getElementById('btn-search');
+  btn.innerHTML=v ? '<div class="loader"></div> Ricerca in corso…' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Avvia ricerca';
+  btn.disabled=v;
+}
+// Classificazione UE dimensione impresa (stima da dati Google Maps)
+function stimaDimensione(r) {
+  // Google Maps restituisce a volte numberOfEmployees o reviewsCount come proxy
+  const dip = r.numberOfEmployees || null;
+  const rev = r.reviewsCount || 0;
+  if(dip !== null) {
+    if(dip < 10)  return 'micro';
+    if(dip < 50)  return 'piccola';
+    if(dip < 250) return 'media';
+    return 'grande';
+  }
+  // Stima euristica da numero recensioni (proxy attività commerciale)
+  if(rev < 20)  return 'micro';
+  if(rev < 80)  return 'piccola';
+  if(rev < 300) return 'media';
+  return 'grande';
+}
+
+function getDimensioniSelezionate() {
+  return [...document.querySelectorAll('#dim-filter input:checked')].map(el=>el.value);
+}
+
+function processAndRender(raw) {
+  const emailF = document.getElementById('email-f').value;
+  const dimSel = getDimensioniSelezionate();
+  risultati = (raw||[])
+    .map(r => ({
+      nome: r.title||'N/D',
+      comune: r.city||r.addressLocality||'',
+      email: r.email||'',
+      tel: r.phone||'',
+      sito: r.website||'',
+      categoria: r.categoryName||'',
+      dipendenti: r.numberOfEmployees ? String(r.numberOfEmployees) : '—',
+      fatturato: '—',
+      dimensione: stimaDimensione(r),
+      recensioni: r.reviewsCount||0
+    }))
+    .filter(r => emailF !== 'yes' || r.email)
+    .filter(r => dimSel.length === 0 || dimSel.includes(r.dimensione));
+  renderRisultati();
+}
+function caricaDemo() {
+  risultati=[
+    {nome:'Agriturismo Tre Stelle',comune:'Oristano',email:'info@trestelle.it',tel:'0783 123456',sito:'www.trestelle.it',categoria:'Agriturismo',dipendenti:'4',fatturato:'< 300k',dimensione:'micro',recensioni:87},
+    {nome:'Falegnameria Murgia',comune:'Nuoro',email:'murgia.legno@gmail.com',tel:'0784 987654',sito:'',categoria:'Falegnameria',dipendenti:'8',fatturato:'300k–1M',dimensione:'micro',recensioni:34},
+    {nome:'Oleificio Sardo SRL',comune:'Sassari',email:'info@oleificiosardo.it',tel:'079 445566',sito:'www.oleificiosardo.it',categoria:'Produzione olio',dipendenti:'15',fatturato:'1M–2M',dimensione:'piccola',recensioni:19},
+    {nome:'Caseificio Barbagia',comune:'Orgosolo',email:'',tel:'0784 402211',sito:'',categoria:'Prod. formaggi',dipendenti:'3',fatturato:'< 300k',dimensione:'micro',recensioni:54},
+    {nome:'Cantina Cannonau DOC',comune:'Jerzu',email:'cantina@cannoc.it',tel:'0782 70123',sito:'www.cannoc.it',categoria:'Cantina vinicola',dipendenti:'12',fatturato:'500k–1M',dimensione:'piccola',recensioni:142},
+    {nome:'Serramenti Tiddia',comune:'Cagliari',email:'tiddia@pec.it',tel:'070 556677',sito:'',categoria:'Artigianato metalli',dipendenti:'5',fatturato:'< 500k',dimensione:'micro',recensioni:28},
+    {nome:'Fattoria Su Mannu',comune:'Oristano',email:'sumannu@gmail.com',tel:'0783 887766',sito:'',categoria:'Azienda agricola',dipendenti:'7',fatturato:'200k–500k',dimensione:'micro',recensioni:61},
+    {nome:'Sardegna Costruzioni SPA',comune:'Cagliari',email:'info@sarcost.it',tel:'070 991122',sito:'www.sarcost.it',categoria:'Costruzioni',dipendenti:'180',fatturato:'20M–50M',dimensione:'media',recensioni:210},
+    {nome:'Distilleria Menhir',comune:'Oristano',email:'',tel:'0783 334455',sito:'www.menhir.it',categoria:'Distilleria',dipendenti:'320',fatturato:'> 50M',dimensione:'grande',recensioni:445},
+  ];
+  // Applica filtro dimensione anche al demo
+  const dimSel = getDimensioniSelezionate();
+  if(dimSel.length > 0) risultati = risultati.filter(r => dimSel.includes(r.dimensione));
+  showNotice('ok',`Caricati ${risultati.length} risultati demo.`);
+  renderRisultati();
+}
+const DIM_LABELS = { micro:'Micro', piccola:'Piccola', media:'Media', grande:'Grande' };
+const DIM_CSS   = { micro:'badge-dim-micro', piccola:'badge-dim-piccola', media:'badge-dim-media', grande:'badge-dim-grande' };
+
+function renderRisultati() {
+  const area=document.getElementById('results-area');
+  if(!risultati.length){ area.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Nessun risultato. Prova a modificare i filtri.</div></div>'; return; }
+  const we=risultati.filter(r=>r.email).length;
+  document.getElementById('btn-export').style.display='inline-flex';
+  area.innerHTML=`
+    <div class="results-header">
+      <span class="results-count">${risultati.length} aziende trovate</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="badge badge-ok">✉ ${we} con email</span>
+        <span class="badge badge-warn">${risultati.length-we} senza</span>
+      </div>
+    </div>
+    <div class="results-list">
+      ${risultati.map((r,i)=>`
+      <div class="result-item">
+        <div>
+          <div class="result-name">${r.nome}</div>
+          <div class="result-sub">📍 ${r.comune} · ${r.categoria}</div>
+          ${r.sito?`<a class="result-link" href="https://${r.sito}" target="_blank">${r.sito}</a>`:''}
+        </div>
+        <div>
+          ${r.email?`<div style="font-size:0.82rem"><a href="mailto:${r.email}" style="color:var(--accent);text-decoration:none">${r.email}</a></div>`:`<span class="badge badge-warn" style="margin-top:2px">no email</span>`}
+          <div class="stat-lbl" style="margin-top:5px">${r.tel}</div>
+        </div>
+        <div>
+          <div class="stat-lbl">Dimensione</div>
+          <div style="margin-top:4px"><span class="badge ${DIM_CSS[r.dimensione]||'badge-info'}">${DIM_LABELS[r.dimensione]||'—'}</span></div>
+        </div>
+        <div><div class="stat-lbl">Dip. stimati</div><div class="stat-val">${r.dipendenti}</div></div>
+        <div class="result-actions">${r.email?`<button class="btn btn-sm btn-primary" onclick="usaEmail(${i})" title="Genera email">✉</button>`:''}</div>
+      </div>`).join('')}
+    </div>`;
+}
+function clearResults() { document.getElementById('results-area').innerHTML=''; document.getElementById('btn-export').style.display='none'; }
+
+function showNotice(type,html) {
+  const icons={ok:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,warn:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,info:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`};
+  const cls=type==='ok'?'notice-ok':type==='warn'?'notice-warn':'notice-info';
+  document.getElementById('notice-area').innerHTML=`<div class="notice ${cls}">${icons[type]||icons.info}<span>${html}</span></div>`;
+}
+
+async function exportXLSX() {
+  if(!risultati.length) return;
+
+  const btn = document.getElementById('btn-export');
+  btn.innerHTML = '<div class="loader"></div> Generando Excel…';
+  btn.disabled = true;
+
+  // Carica ExcelJS se non ancora caricato
+  if(!window.ExcelJS) {
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'BandiProspect';
+  wb.created = new Date();
+
+  const bando = document.getElementById('bando-nome').value || 'Ricerca';
+  const oggi = new Date().toLocaleDateString('it-IT');
+  const nomeFile = (bando).replace(/[^a-zA-Z0-9]/g,'_') + '_' + new Date().toISOString().slice(0,10);
+
+  // ── PALETTE ──
+  const BLU_SCURO  = '1E3A5F';
+  const BLU_MED    = '2563EB';
+  const BLU_LIGHT  = 'EFF6FF';
+  const BIANCO     = 'FFFFFFFF';
+  const BORDO      = 'CBD5E1';
+  const GRIGIO_ALT = 'F8FAFC';
+  const GRIGIO_T   = '6B7280';
+
+  const DIM_BG  = { micro:'EDE9FE', piccola:'DBEAFE', media:'DCFCE7', grande:'FFEDD5' };
+  const DIM_FG  = { micro:'7C3AED', piccola:'1D4ED8', media:'15803D', grande:'EA580C' };
+
+  function solidFill(hex) { return { type:'pattern', pattern:'solid', fgColor:{argb:'FF'+hex} }; }
+  function thinBorder(color=BORDO) {
+    const s = { style:'thin', color:{argb:'FF'+color} };
+    return { top:s, bottom:s, left:s, right:s };
+  }
+  function font(bold=false, color='111827', size=10) {
+    return { name:'Arial', bold, color:{argb:'FF'+color}, size };
+  }
+
+  // ══════════════════════════════════════════════
+  // FOGLIO 1 — AZIENDE
+  // ══════════════════════════════════════════════
+  const ws = wb.addWorksheet('Aziende', { views:[{state:'frozen', xSplit:0, ySplit:4}] });
+
+  // Larghezze colonne
+  const colDefs = [
+    {key:'num',   width:4},
+    {key:'nome',  width:30},
+    {key:'comune',width:14},
+    {key:'cat',   width:18},
+    {key:'dim',   width:11},
+    {key:'email', width:30},
+    {key:'tel',   width:14},
+    {key:'sito',  width:22},
+    {key:'dip',   width:12},
+    {key:'fat',   width:12},
+  ];
+  ws.columns = colDefs.map(c=>({key:c.key, width:c.width}));
+
+  // Riga 1 — Titolo
+  ws.mergeCells('A1:J1');
+  const r1 = ws.getRow(1);
+  r1.height = 36;
+  const c1 = ws.getCell('A1');
+  c1.value = 'BandiProspect — Elenco Aziende';
+  c1.font = { name:'Arial', bold:true, color:{argb:'FFFFFFFF'}, size:14 };
+  c1.fill = solidFill(BLU_SCURO);
+  c1.alignment = { vertical:'middle', horizontal:'left', indent:1 };
+
+  // Riga 2 — Sottotitolo
+  ws.mergeCells('A2:J2');
+  const r2 = ws.getRow(2); r2.height = 18;
+  const c2 = ws.getCell('A2');
+  c2.value = `Bando: ${bando}   •   Esportato il: ${oggi}   •   ${risultati.length} aziende`;
+  c2.font = { name:'Arial', color:{argb:'FF94A3B8'}, size:9, italic:true };
+  c2.fill = solidFill(BLU_SCURO);
+  c2.alignment = { vertical:'middle', horizontal:'left', indent:1 };
+
+  // Riga 3 — spaziatura
+  ws.getRow(3).height = 6;
+
+  // Riga 4 — Intestazioni
+  const headers = ['#','Nome Azienda','Comune','Categoria','Dimensione','Email','Telefono','Sito Web','Dip. Stimati','Fatturato'];
+  const r4 = ws.getRow(4); r4.height = 22;
+  headers.forEach((h,i) => {
+    const cell = r4.getCell(i+1);
+    cell.value = h;
+    cell.font = font(true, BLU_SCURO, 9);
+    cell.fill = solidFill(BLU_LIGHT);
+    cell.alignment = { vertical:'middle', horizontal: i===0 ? 'center' : 'left', indent: i===0 ? 0 : 1 };
+    cell.border = {
+      top:    { style:'medium', color:{argb:'FF'+BLU_MED} },
+      bottom: { style:'medium', color:{argb:'FF'+BLU_MED} },
+      left:   { style: i===0 ? 'medium' : 'thin', color:{argb:'FF'+(i===0?BLU_MED:BORDO)} },
+      right:  { style: i===9 ? 'medium' : 'thin', color:{argb:'FF'+(i===9?BLU_MED:BORDO)} },
+    };
+  });
+
+  // Righe dati
+  risultati.forEach((r, ri) => {
+    const rowNum = 5 + ri;
+    const row = ws.getRow(rowNum);
+    row.height = 20;
+    const isAlt = ri % 2 === 0;
+    const rowBg = isAlt ? GRIGIO_ALT : 'FFFFFF';
+    const dim = r.dimensione || 'micro';
+    const dimLabel = DIM_LABELS[dim] || '—';
+    const hasEmail = !!r.email;
+
+    const vals = [ri+1, r.nome, r.comune, r.categoria, dimLabel,
+                  hasEmail ? r.email : 'non disponibile',
+                  r.tel, r.sito, r.dipendenti, r.fatturato];
+
+    vals.forEach((val, ci) => {
+      const cell = row.getCell(ci+1);
+      cell.value = val;
+      cell.alignment = { vertical:'middle', horizontal: ci===0 ? 'center' : 'left', indent: ci===0?0:1 };
+      cell.border = {
+        top:    { style:'thin', color:{argb:'FFE2E8F0'} },
+        bottom: { style:'thin', color:{argb:'FFE2E8F0'} },
+        left:   { style: ci===0 ? 'medium' : 'thin', color:{argb:'FF'+(ci===0?BLU_SCURO:'E2E8F0')} },
+        right:  { style: ci===9 ? 'medium' : 'thin', color:{argb:'FF'+(ci===9?BLU_SCURO:'E2E8F0')} },
+      };
+
+      if(ci===0) {
+        cell.font = font(false, GRIGIO_T, 9);
+        cell.fill = solidFill(isAlt ? 'F1F5F9' : 'F8FAFC');
+      } else if(ci===1) {
+        cell.font = font(true, '111827', 10);
+        cell.fill = solidFill(rowBg);
+      } else if(ci===4) { // Dimensione
+        cell.font = { name:'Arial', bold:true, color:{argb:'FF'+DIM_FG[dim]}, size:9 };
+        cell.fill = solidFill(DIM_BG[dim]||'F3F4F6');
+        cell.alignment = { vertical:'middle', horizontal:'center' };
+      } else if(ci===5) { // Email
+        cell.font = hasEmail
+          ? { name:'Arial', color:{argb:'FF'+BLU_MED}, size:9, underline:true }
+          : { name:'Arial', color:{argb:'FFCBD5E1'}, size:9, italic:true };
+        cell.fill = solidFill(rowBg);
+      } else if(ci===7) { // Sito
+        cell.font = val ? { name:'Arial', color:{argb:'FF'+BLU_MED}, size:9 }
+                        : { name:'Arial', color:{argb:'FFCBD5E1'}, size:9 };
+        cell.fill = solidFill(rowBg);
+      } else {
+        cell.font = font(false, '374151', 9);
+        cell.fill = solidFill(rowBg);
+      }
+    });
+
+    // Bordo esterno più scuro ultima riga
+    if(ri === risultati.length - 1) {
+      for(let ci=1; ci<=10; ci++) {
+        const cell = row.getCell(ci);
+        cell.border = { ...cell.border, bottom:{ style:'medium', color:{argb:'FF'+BLU_SCURO} } };
+      }
+    }
+  });
+
+  // Riga totale
+  const totRow = ws.getRow(5 + risultati.length);
+  totRow.height = 20;
+  const nEmail = risultati.filter(r=>r.email).length;
+
+  ws.mergeCells(`A${5+risultati.length}:D${5+risultati.length}`);
+  const totA = totRow.getCell(1);
+  totA.value = `Totale: ${risultati.length} aziende`;
+  totA.font = font(true, BLU_SCURO, 9);
+  totA.fill = solidFill(BLU_LIGHT);
+  totA.alignment = { vertical:'middle', horizontal:'left', indent:1 };
+  totA.border = { top:{style:'medium',color:{argb:'FF'+BLU_MED}}, bottom:{style:'medium',color:{argb:'FF'+BLU_MED}}, left:{style:'medium',color:{argb:'FF'+BLU_MED}} };
+
+  ws.mergeCells(`E${5+risultati.length}:G${5+risultati.length}`);
+  const totE = totRow.getCell(5);
+  totE.value = `Con email: ${nEmail}   /   Senza: ${risultati.length - nEmail}`;
+  totE.font = font(true, '15803D', 9);
+  totE.fill = solidFill(BLU_LIGHT);
+  totE.alignment = { vertical:'middle', horizontal:'center' };
+  totE.border = { top:{style:'medium',color:{argb:'FF'+BLU_MED}}, bottom:{style:'medium',color:{argb:'FF'+BLU_MED}} };
+
+  for(let ci=8; ci<=10; ci++) {
+    const cell = totRow.getCell(ci);
+    cell.fill = solidFill(BLU_LIGHT);
+    cell.border = {
+      top:{style:'medium',color:{argb:'FF'+BLU_MED}},
+      bottom:{style:'medium',color:{argb:'FF'+BLU_MED}},
+      right: ci===10 ? {style:'medium',color:{argb:'FF'+BLU_MED}} : {style:'thin',color:{argb:'FF'+BORDO}}
+    };
+  }
+
+  // ══════════════════════════════════════════════
+  // FOGLIO 2 — LEGENDA
+  // ══════════════════════════════════════════════
+  const ws2 = wb.addWorksheet('Legenda');
+  ws2.columns = [{width:3},{width:16},{width:36},{width:22},{width:22}];
+
+  ws2.mergeCells('B1:E1');
+  const leg1 = ws2.getCell('B1');
+  leg1.value = 'Legenda — Classificazione dimensione impresa (UE)';
+  leg1.font = { name:'Arial', bold:true, color:{argb:'FFFFFFFF'}, size:12 };
+  leg1.fill = solidFill(BLU_SCURO);
+  leg1.alignment = { vertical:'middle', horizontal:'left', indent:1 };
+  ws2.getRow(1).height = 32;
+  ws2.getRow(2).height = 8;
+
+  ['Categoria','Dipendenti','Fatturato annuo','Colore'].forEach((h,i) => {
+    const c = ws2.getRow(3).getCell(i+2);
+    c.value = h; c.font = font(true, BLU_SCURO, 9);
+    c.fill = solidFill(BLU_LIGHT);
+    c.alignment = { vertical:'middle', horizontal:'center' };
+    c.border = thinBorder(BLU_MED);
+  });
+  ws2.getRow(3).height = 20;
+
+  [
+    ['Micro',   '< 10',     '< € 2.000.000',   'EDE9FE','7C3AED'],
+    ['Piccola', '10 – 49',  '< € 10.000.000',  'DBEAFE','1D4ED8'],
+    ['Media',   '50 – 249', '< € 50.000.000',  'DCFCE7','15803D'],
+    ['Grande',  '≥ 250',    'Nessun limite',   'FFEDD5','EA580C'],
+  ].forEach(([cat,dip,fat,bg,fg], i) => {
+    const row = ws2.getRow(4+i); row.height = 22;
+    const c1 = row.getCell(2);
+    c1.value = cat; c1.font = { name:'Arial', bold:true, color:{argb:'FF'+fg}, size:10 };
+    c1.fill = solidFill(bg); c1.border = thinBorder(); c1.alignment={vertical:'middle',horizontal:'center'};
+    [[3,dip],[4,fat]].forEach(([ci,v]) => {
+      const c = row.getCell(ci); c.value = v;
+      c.font = font(false,'374151',9);
+      c.fill = solidFill(i%2===0?'FFFFFF':'F8FAFC');
+      c.border = thinBorder(); c.alignment={vertical:'middle',horizontal:'center'};
+    });
+    const cc = row.getCell(5); cc.value = '● '+cat;
+    cc.font = { name:'Arial', bold:true, color:{argb:'FF'+fg}, size:9 };
+    cc.fill = solidFill(bg); cc.border = thinBorder(); cc.alignment={vertical:'middle',horizontal:'center'};
+  });
+
+  ws2.getRow(8).height = 10;
+  ws2.mergeCells('B9:E9');
+  const note = ws2.getCell('B9');
+  note.value = '⚠  La classificazione è una stima basata sul numero di dipendenti dichiarato o sul numero di recensioni Google Maps. Per dati ufficiali verificare su Atoka o InfoCamere.';
+  note.font = { name:'Arial', color:{argb:'FF92400E'}, size:8, italic:true };
+  note.fill = solidFill('FFFBEB');
+  note.border = { left:{style:'medium',color:{argb:'FFD97706'}}, top:thinBorder('FDE68A').top, bottom:thinBorder('FDE68A').bottom, right:thinBorder('FDE68A').right };
+  note.alignment = { vertical:'middle', horizontal:'left', wrapText:true, indent:1 };
+  ws2.getRow(9).height = 30;
+
+  // ── DOWNLOAD ──
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeFile + '.xlsx'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Esporta Excel';
+  btn.disabled = false;
+}
+
+function salvaStorico(queries) {
+  const bando=document.getElementById('bando-nome').value||'—';
+  const store=JSON.parse(localStorage.getItem('storico')||'[]');
+  store.unshift({id:Date.now(),bando,query:queries.join(', '),data:new Date().toLocaleDateString('it-IT'),count:risultati.length});
+  localStorage.setItem('storico',JSON.stringify(store.slice(0,30)));
+}
+function renderStorico() {
+  const el=document.getElementById('storico-list'); if(!el) return;
+  const store=JSON.parse(localStorage.getItem('storico')||'[]');
+  if(!store.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Nessuna ricerca salvata.</div></div>'; return; }
+  el.innerHTML=store.map(s=>`<div class="history-item"><div><div class="history-title">${s.bando}</div><div class="history-meta">${s.query} · ${s.data}</div></div><span class="badge badge-info">${s.count} aziende</span></div>`).join('');
+}
+function clearStorico() { if(confirm('Eliminare tutto lo storico?')){ localStorage.removeItem('storico'); renderStorico(); } }
+
+function usaEmail(i) {
+  const r=risultati[i];
+  document.getElementById('tpl-dest').value=r.nome;
+  document.getElementById('tpl-bando').value=document.getElementById('bando-nome').value;
+  document.getElementById('tpl-mitt').value=localStorage.getItem('pref_studio')||'';
+  showView('email');
+}
+function genTemplate() {
+  const bando=document.getElementById('tpl-bando').value||'il bando';
+  const mitt=document.getElementById('tpl-mitt').value||'il nostro studio';
+  const ben=document.getElementById('tpl-ben').value||'finanziamenti a fondo perduto';
+  const dest=document.getElementById('tpl-dest').value||'[Nome Azienda]';
+  const sogg=`Opportunità di finanziamento — ${bando}`;
+  const corpo=`Gentile ${dest},\n\nmi permetto di contattarla per segnalare un'opportunità di finanziamento che potrebbe essere di interesse per la sua azienda.\n\nÈ attualmente aperto il bando "${bando}", che prevede ${ben}.\n\nRitengo che la sua realtà possa rientrare tra i soggetti beneficiari. Sono a disposizione per un approfondimento senza impegno e posso inviarle una scheda informativa dettagliata.\n\nIn attesa di un suo gentile riscontro, porgo cordiali saluti.\n\n${mitt}`;
+  document.getElementById('email-sogg').style.display='block';
+  document.getElementById('email-sogg').innerHTML=`<div class="subj-row"><span class="subj-label">Oggetto:</span><span>${sogg}</span></div>`;
+  document.getElementById('email-body').style.display='block';
+  document.getElementById('email-body').innerHTML=`<div class="email-box">${corpo}</div>`;
+  document.getElementById('btn-copy-email').style.display='inline-flex';
+  window._emailCorpo=corpo;
+}
+function copyEmail() {
+  if(!window._emailCorpo) return;
+  navigator.clipboard.writeText(window._emailCorpo).then(()=>{ const btn=document.getElementById('btn-copy-email'); btn.textContent='Copiato!'; setTimeout(()=>btn.textContent='Copia testo',2000); });
+}
+function renderChecklist() {
+  const items=['Personalizzare il nome dell\'azienda destinataria','Verificare che l\'azienda rientri nei requisiti del bando','Aggiungere la firma con i propri contatti','Allegare eventuale scheda informativa del bando (PDF)','Registrare l\'invio: data, azienda, esito'];
+  document.getElementById('checklist').innerHTML=items.map(t=>`<label class="checklist-item"><input type="checkbox"> ${t}</label>`).join('');
+}
+
+function saveKey() { const k=document.getElementById('apify-key-input').value.trim(); localStorage.setItem('apify_key',k); updateApiStatus(!!k); showFeedback('ok',k?'API key salvata.':'API key rimossa.'); }
+async function testKey() {
+  const k=document.getElementById('apify-key-input').value.trim();
+  if(!k){ showFeedback('warn','Inserisci prima una API key.'); return; }
+  showFeedback('info','Test in corso…');
+  try { const r=await fetch(`https://api.apify.com/v2/users/me?token=${k}`); if(r.ok){ const d=await r.json(); showFeedback('ok',`Connesso come: ${d.username||'utente Apify'}`); } else showFeedback('warn','API key non valida ('+r.status+').'); } catch { showFeedback('warn','Errore di rete.'); }
+}
+function clearKey() { localStorage.removeItem('apify_key'); document.getElementById('apify-key-input').value=''; updateApiStatus(false); showFeedback('ok','Chiave rimossa.'); }
+function savePrefs() { const s=document.getElementById('pref-studio').value.trim(); localStorage.setItem('pref_studio',s); showFeedback('ok','Preferenze salvate.'); }
+function showFeedback(type,msg) { const map={ok:'badge-ok',warn:'badge-warn',info:'badge-info'}; document.getElementById('key-feedback').innerHTML=`<span class="badge ${map[type]||'badge-info'}">${msg}</span>`; }
+</script>
+</body>
+</html>
