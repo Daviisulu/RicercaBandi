@@ -571,15 +571,35 @@ async function avviaRicerca() {
   showNotice('info',`Ricerca in corso per <strong>${queries.length} quer${queries.length===1?'y':'ies'}</strong>${queries.length<=3?' ('+queries.join(', ')+')':""}. Attendere 1–3 minuti.`);
   clearResults();
   try {
-    const maxItems=parseInt(document.getElementById('max-res').value)||50;
-    const resp=await fetch(`https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ searchStringsArray:queries, maxCrawledPlacesPerSearch:Math.ceil(maxItems/queries.length), language:'it', countryCode:'IT', includeHistogram:false, includeOpeningHours:false })
-    });
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    processAndRender(await resp.json()); salvaStorico(queries);
-  } catch(err) { showNotice('warn','Errore: '+err.message+'. Controlla la API key e riprova.'); }
-  finally { setSearching(false); }
+    const maxItems = parseInt(document.getElementById('max-res').value) || 50;
+    const perQuery = Math.max(1, Math.ceil(maxItems / queries.length));
+    const payload = {
+      searchStringsArray: queries,
+      maxCrawledPlacesPerSearch: perQuery,
+      language: 'it',
+      countryCode: 'IT',
+      maxImages: 0,
+      includeHistogram: false,
+      includeOpeningHours: false,
+      includePeopleAlsoSearchFor: false,
+      maxReviews: 0,
+    };
+    const resp = await fetch(
+      `https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items?token=${key}&maxItems=${maxItems}&timeout=300`,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }
+    );
+    if(!resp.ok) {
+      let errMsg = 'HTTP ' + resp.status;
+      try { const e = await resp.json(); if(e?.error?.message) errMsg += ': ' + e.error.message; } catch {}
+      throw new Error(errMsg);
+    }
+    const data = await resp.json();
+    if(!Array.isArray(data)) throw new Error('Risposta Apify non valida. Riprova.');
+    processAndRender(data);
+    salvaStorico(queries);
+  } catch(err) {
+    showNotice('warn', 'Errore: ' + err.message + '. Se persiste, verifica che la API key abbia crediti disponibili su apify.com.');
+  } finally { setSearching(false); }
 }
 function setSearching(v) {
   isSearching=v;
