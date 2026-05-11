@@ -673,18 +673,31 @@ async function avviaRicerca() {
     return;
   }
   const settoreQ = settore || 'aziende';
-  const queries = comuni.length>0
-    ? comuni.map(c=>`${settoreQ} ${c} ${prov}`.trim().replace(/\s+/g,' '))
-    : [`${settoreQ} ${prov||'Italia'}`.trim()];
+
+  // Costruzione query: "settore a Comune" oppure "settore in Regione"
+  // Non aggiungiamo la provincia se il comune è già specifico — evita ridondanza
+  const queries = comuni.length > 0
+    ? comuni.map(c => `${settoreQ} a ${c}`.trim())
+    : [`${settoreQ} in ${prov || 'Italia'}`.trim()];
+
+  // Validazione query: avvisa se sembrano troppo generiche
+  const queryWarnings = [];
+  if(!settore) queryWarnings.push('Nessun settore specificato — la ricerca userà "aziende" come termine generico');
+  if(comuni.length === 0 && !prov) queryWarnings.push('Nessuna area geografica — la ricerca coprirà tutta Italia');
+  if(comuni.length > 20) queryWarnings.push(`${comuni.length} comuni: la ricerca potrebbe richiedere diversi minuti`);
+
   setSearching(true);
-  showNotice('info',`Ricerca in corso per <strong>${queries.length} quer${queries.length===1?'y':'ies'}</strong>${queries.length<=3?' ('+queries.join(', ')+')':""}. Attendere 1–3 minuti.`);
+  const qPreview = queries.slice(0,3).join(' | ') + (queries.length > 3 ? ` … +${queries.length-3}` : '');
+  showNotice('info',`Ricerca in corso: <strong>${queries.length} quer${queries.length===1?'y':'ies'}</strong> — <em>${qPreview}</em>. Attendere 1–3 minuti.`);
   clearResults();
   try {
     const maxItems = parseInt(document.getElementById('max-res').value) || 50;
     const perQuery = Math.max(1, Math.ceil(maxItems / queries.length));
+
+    // locationQuery solo se NON abbiamo comuni specifici (evita conflitti)
     const payload = {
       searchStringsArray: queries,
-      locationQuery: prov || 'Italia',
+      ...(comuni.length === 0 && prov ? { locationQuery: prov } : {}),
       maxCrawledPlacesPerSearch: perQuery,
       language: 'it',
       maxImages: 0,
@@ -744,27 +757,118 @@ function getDimensioniSelezionate() {
 }
 
 function processAndRender(raw) {
-  const emailF = document.getElementById('email-f').value;
-  const dimSel = getDimensioniSelezionate();
+  const emailF  = document.getElementById('email-f').value;
+  const dimSel  = getDimensioniSelezionate();
+  const dipMin  = parseInt(document.getElementById('dip-min').value) || 0;
+  const dipMax  = parseInt(document.getElementById('dip-max').value) || 9999;
+  const settore = document.getElementById('settore').value.trim().toLowerCase();
   const s = v => (v != null && String(v).trim()) ? String(v).trim() : '';
-  risultati = (raw||[])
+
+  // 1. Mappa tutti i campi
+  const tuttiMappati = (raw||[])
     .filter(r => r && typeof r === 'object')
     .map(r => ({
-      nome:       s(r.title)          || s(r.name)            || 'N/D',
-      comune:     s(r.city)           || s(r.addressLocality)  || s(r.address)?.split(',').pop()?.trim() || '—',
+      nome:       s(r.title)         || s(r.name)           || 'N/D',
+      comune:     s(r.city)          || s(r.addressLocality) || s(r.address)?.split(',').pop()?.trim() || '—',
       email:      s(r.email),
-      tel:        s(r.phone)          || s(r.phoneUnformatted) || '—',
-      sito:       s(r.website)        || s(r.url)              || '',
-      categoria:  s(r.categoryName)   || s(r.category)         || s(r.types?.[0]) || '—',
+      tel:        s(r.phone)         || s(r.phoneUnformatted) || '—',
+      sito:       s(r.website)       || s(r.url)             || '',
+      categoria:  s(r.categoryName)  || s(r.category)        || s(r.types?.[0]) || '—',
       dipendenti: r.numberOfEmployees != null ? String(r.numberOfEmployees) : '—',
       fatturato:  '—',
       dimensione: stimaDimensione(r),
       recensioni: Number(r.reviewsCount)||0,
-      indirizzo:  s(r.address) || s(r.street) || '',
-    }))
-    .filter(r => emailF !== 'yes' || r.email)
-    .filter(r => dimSel.length === 0 || dimSel.includes(r.dimensione));
+      indirizzo:  s(r.address)       || s(r.street)          || '',
+    }));
+
+  // 2. Applica filtri tracciando quanti vengono rimossi
+  const filtriReport = [];
+  let pool = tuttiMappati;
+  const prima = pool.length;
+
+  // Filtro email
+  if(emailF === 'yes') {
+    const dopo = pool.filter(r => r.email);
+    if(pool.length - dopo.length > 0)
+      filtriReport.push({ filtro:'Solo con email', rimossi: pool.length - dopo.length, warning: dopo.length === 0 });
+    pool = dopo;
+  }
+
+  // Filtro dimensione
+  if(dimSel.length > 0) {
+    const dopo = pool.filter(r => dimSel.includes(r.dimensione));
+    if(pool.length - dopo.length > 0)
+      filtriReport.push({ filtro:`Dimensione (${dimSel.map(d=>DIM_LABELS[d]).join(', ')})`, rimossi: pool.length - dopo.length, warning: dopo.length === 0 });
+    pool = dopo;
+  }
+
+  risultati = pool;
+
+  // 3. Controllo coerenza categoria vs settore cercato
+  const coerenzaReport = [];
+  if(settore && risultati.length > 0) {
+    const incoerenti = risultati.filter(r => {
+      const cat = r.categoria.toLowerCase();
+      const nome = r.nome.toLowerCase();
+      return !cat.includes(settore) && !nome.includes(settore);
+    });
+    if(incoerenti.length > 0) {
+      const pct = Math.round(incoerenti.length / risultati.length * 100);
+      coerenzaReport.push({
+        tipo: 'categoria',
+        msg: `${incoerenti.length} aziende su ${risultati.length} (${pct}%) potrebbero non essere nel settore "${settore}"`,
+        warning: pct > 50
+      });
+    }
+  }
+
+  // 4. Salva per debug
+  window._filtriReport   = filtriReport;
+  window._coerenzaReport = coerenzaReport;
+  window._totaleGrezzo   = prima;
+
   renderRisultati();
+  renderFiltriReport(filtriReport, coerenzaReport, prima);
+}
+
+function renderFiltriReport(filtriReport, coerenzaReport, totGrezzo) {
+  // Mostra avvisi inline nella schermata risultati
+  const area = document.getElementById('results-area');
+  if(!area) return;
+
+  let html = '';
+
+  // Avvisi filtri aggressivi
+  filtriReport.forEach(f => {
+    if(f.warning) {
+      html += `<div class="notice notice-warn" style="margin-bottom:8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Filtro <strong>${f.filtro}</strong> ha rimosso tutti i ${f.rimossi} risultati. Prova ad allargare i filtri.</span>
+      </div>`;
+    } else if(f.rimossi > 0) {
+      html += `<div class="notice notice-info" style="margin-bottom:8px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Filtro <strong>${f.filtro}</strong>: rimossi ${f.rimossi} risultati su ${totGrezzo} totali da Apify.</span>
+      </div>`;
+    }
+  });
+
+  // Avvisi coerenza categoria
+  coerenzaReport.forEach(c => {
+    const cls = c.warning ? 'notice-warn' : 'notice-info';
+    html += `<div class="notice ${cls}" style="margin-bottom:8px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>⚠ Coerenza settore: ${c.msg}. Google Maps non sempre classifica le categorie in modo preciso.</span>
+    </div>`;
+  });
+
+  if(html) {
+    // Inserisce gli avvisi prima del contenuto esistente
+    area.insertAdjacentHTML('afterbegin', html);
+  }
+
+  // Aggiorna anche il tab qualità nel debug
+  updateDbgQualita();
 }
 function caricaDemo() {
   risultati=[
@@ -1196,27 +1300,84 @@ function updateDbgQualita() {
   const el = document.getElementById('dbg-qualita-box');
   if(!el || !risultati.length) return;
   const tot = risultati.length;
+  const totGrezzo = window._totaleGrezzo || tot;
+  const filtriReport = window._filtriReport || [];
+  const coerenzaReport = window._coerenzaReport || [];
+
   const fields = [
-    { label:'Nome',       key:'nome',       check: r => r.nome && r.nome !== 'N/D' },
-    { label:'Comune',     key:'comune',     check: r => r.comune && r.comune !== '—' },
-    { label:'Email',      key:'email',      check: r => !!r.email },
-    { label:'Telefono',   key:'tel',        check: r => r.tel && r.tel !== '—' },
-    { label:'Sito web',   key:'sito',       check: r => !!r.sito },
-    { label:'Categoria',  key:'categoria',  check: r => r.categoria && r.categoria !== '—' },
-    { label:'Indirizzo',  key:'indirizzo',  check: r => !!r.indirizzo },
+    { label:'Nome',      check: r => r.nome && r.nome !== 'N/D' },
+    { label:'Comune',    check: r => r.comune && r.comune !== '—' },
+    { label:'Email',     check: r => !!r.email },
+    { label:'Telefono',  check: r => r.tel && r.tel !== '—' },
+    { label:'Sito web',  check: r => !!r.sito },
+    { label:'Categoria', check: r => r.categoria && r.categoria !== '—' },
+    { label:'Indirizzo', check: r => !!r.indirizzo },
   ];
   const dimCount = { micro:0, piccola:0, media:0, grande:0 };
   risultati.forEach(r => { if(dimCount[r.dimensione] !== undefined) dimCount[r.dimensione]++; });
   const nEmail = risultati.filter(r=>r.email).length;
+  const scartati = totGrezzo - tot;
 
   el.innerHTML = `
-    <div class="dbg-stats">
-      <div class="dbg-stat"><div class="dbg-stat-n">${tot}</div><div class="dbg-stat-l">Aziende trovate</div></div>
-      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--success)">${nEmail}</div><div class="dbg-stat-l">Con email</div></div>
-      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--warn)">${tot-nEmail}</div><div class="dbg-stat-l">Senza email</div></div>
-      <div class="dbg-stat"><div class="dbg-stat-n" style="color:var(--accent)">${Math.round(nEmail/tot*100)}%</div><div class="dbg-stat-l">Tasso email</div></div>
+    <!-- Statistiche principali -->
+    <div class="dbg-stats" style="grid-template-columns:repeat(4,1fr)">
+      <div class="dbg-stat">
+        <div class="dbg-stat-n">${totGrezzo}</div>
+        <div class="dbg-stat-l">Ricevuti da Apify</div>
+      </div>
+      <div class="dbg-stat">
+        <div class="dbg-stat-n" style="color:var(--accent)">${tot}</div>
+        <div class="dbg-stat-l">Dopo filtri</div>
+      </div>
+      <div class="dbg-stat">
+        <div class="dbg-stat-n" style="color:${scartati>0?'var(--warn)':'var(--text3)'}">${scartati}</div>
+        <div class="dbg-stat-l">Scartati dai filtri</div>
+      </div>
+      <div class="dbg-stat">
+        <div class="dbg-stat-n" style="color:var(--success)">${nEmail}</div>
+        <div class="dbg-stat-l">Con email (${Math.round(nEmail/tot*100)}%)</div>
+      </div>
     </div>
-    <table class="dbg-field-table">
+
+    <!-- Report filtri applicati -->
+    ${filtriReport.length > 0 ? `
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Filtri applicati post-ricerca</div>
+      <table class="dbg-field-table">
+        <thead><tr><th>Filtro</th><th>Rimossi</th><th>Impatto</th><th>Stato</th></tr></thead>
+        <tbody>
+          ${filtriReport.map(f => {
+            const pct = Math.round(f.rimossi / totGrezzo * 100);
+            return `<tr>
+              <td style="font-weight:500">${f.filtro}</td>
+              <td style="color:var(--warn)">${f.rimossi}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="dbg-pct-bar" style="flex:1;width:80px"><div class="dbg-pct-fill ${pct>70?'low':pct>40?'mid':''}" style="width:${pct}%"></div></div>
+                  <span style="font-size:0.78rem;min-width:28px">${pct}%</span>
+                </div>
+              </td>
+              <td><span class="badge ${f.warning?'badge-err':'badge-warn'}">${f.warning?'⚠ Tutti rimossi':'Attivo'}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>` : `<div class="notice notice-ok" style="margin-bottom:1rem"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Nessun filtro aggressivo — tutti i risultati Apify sono stati mantenuti.</span></div>`}
+
+    <!-- Report coerenza categoria -->
+    ${coerenzaReport.length > 0 ? `
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Coerenza settore / categoria</div>
+      ${coerenzaReport.map(c=>`
+        <div class="notice ${c.warning?'notice-warn':'notice-info'}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>${c.msg}</span>
+        </div>`).join('')}
+    </div>` : (document.getElementById('settore')?.value ? `<div class="notice notice-ok" style="margin-bottom:1rem"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Coerenza settore OK — tutti i risultati sembrano pertinenti.</span></div>` : '')}
+
+    <!-- Copertura campi -->
+    <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Copertura campi</div>
+    <table class="dbg-field-table" style="margin-bottom:1.25rem">
       <thead><tr><th>Campo</th><th>Compilati</th><th>Mancanti</th><th>Copertura</th></tr></thead>
       <tbody>
         ${fields.map(f => {
@@ -1227,7 +1388,7 @@ function updateDbgQualita() {
             <td style="font-weight:500">${f.label}</td>
             <td style="color:var(--success)">${ok}</td>
             <td style="color:${tot-ok>0?'var(--warn)':'var(--text3)'}">${tot-ok}</td>
-            <td style="min-width:120px">
+            <td>
               <div style="display:flex;align-items:center;gap:8px">
                 <div class="dbg-pct-bar" style="flex:1"><div class="dbg-pct-fill ${cls}" style="width:${pct}%"></div></div>
                 <span style="font-size:0.78rem;font-weight:500;min-width:32px;text-align:right">${pct}%</span>
@@ -1237,16 +1398,16 @@ function updateDbgQualita() {
         }).join('')}
       </tbody>
     </table>
-    <div style="margin-top:1.25rem">
-      <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Distribuzione dimensione impresa</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${Object.entries(dimCount).map(([k,v])=>`
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;text-align:center">
-            <div style="font-size:1.1rem;font-weight:600">${v}</div>
-            <div style="font-size:0.72rem;color:var(--text2);margin-top:2px">${DIM_LABELS[k]||k}</div>
-            <div style="font-size:0.7rem;color:var(--text3)">${tot>0?Math.round(v/tot*100):0}%</div>
-          </div>`).join('')}
-      </div>
+
+    <!-- Distribuzione dimensione -->
+    <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Distribuzione dimensione impresa</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${Object.entries(dimCount).map(([k,v])=>`
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 14px;text-align:center;min-width:80px">
+          <div style="font-size:1.1rem;font-weight:600">${v}</div>
+          <div style="font-size:0.72rem;color:var(--text2);margin-top:2px">${DIM_LABELS[k]||k}</div>
+          <div style="font-size:0.7rem;color:var(--text3)">${tot>0?Math.round(v/tot*100):0}%</div>
+        </div>`).join('')}
     </div>`;
 }
 
